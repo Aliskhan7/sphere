@@ -1,0 +1,54 @@
+.App {
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 40px;
+  border-radius: 10px;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  margin-bottom: 30px;
+  color: #61dafb;
+}
+
+.counter {
+  margin-top: 20px;
+}
+
+.counter p {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: #61dafb;
+  border: none;
+  color: #282c34;
+  padding: 12px 24px;
+  margin: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #4fa8c5;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+
