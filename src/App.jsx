@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 import { Hands } from '@mediapipe/hands';
+import './App.css';
 
 const COUNT = 15000;
 
@@ -12,13 +13,13 @@ const generateShape = (shape) => {
     const i3 = i * 3;
     let x, y, z;
     if (shape === 'SATURN') {
-      if (i < COUNT * 0.6) { // Сфера
+      if (i < COUNT * 0.6) { // Sphere
         const phi = Math.acos(2 * Math.random() - 1);
         const theta = Math.random() * Math.PI * 2;
         x = 2.5 * Math.sin(phi) * Math.cos(theta);
         y = 2.5 * Math.sin(phi) * Math.sin(theta);
         z = 2.5 * Math.cos(phi);
-      } else { // Кольцо
+      } else { // Ring
         const angle = Math.random() * Math.PI * 2;
         const r = 3.5 + Math.random() * 1.5;
         x = Math.cos(angle) * r;
@@ -42,12 +43,12 @@ const generateShape = (shape) => {
   return pos;
 };
 
-// Компонент для плавного управления камерой
+// Component for smooth camera control
 function CameraController({ targetZoom }) {
   const { camera } = useThree();
   
   useFrame(() => {
-    // Плавное изменение позиции камеры
+    // Smooth camera position change
     camera.position.z += (targetZoom - camera.position.z) * 0.1;
   });
   
@@ -57,7 +58,7 @@ function CameraController({ targetZoom }) {
 function Particles({ handPos, shape, rotationAngle }) {
   const ref = useRef();
   const targetData = useMemo(() => generateShape(shape), [shape]);
-  // Инициализируем позиции из целевой формы, чтобы частицы сразу были видны
+  // Initialize positions from target shape so particles are visible immediately
   const initialPos = useMemo(() => {
     const pos = new Float32Array(COUNT * 3);
     for (let i = 0; i < COUNT; i++) {
@@ -80,7 +81,7 @@ function Particles({ handPos, shape, rotationAngle }) {
       let ty = targetData[i3 + 1];
       let tz = targetData[i3 + 2];
 
-      // Применяем вращение к целевым позициям
+      // Apply rotation to target positions
       if (rotationAngle !== 0) {
         const cos = Math.cos(rotationAngle);
         const sin = Math.sin(rotationAngle);
@@ -91,46 +92,46 @@ function Particles({ handPos, shape, rotationAngle }) {
       }
 
       if (handPos && handPos.x !== undefined && handPos.y !== undefined) {
-        // Преобразуем координаты MediaPipe (0-1) в координаты Three.js
+        // Convert MediaPipe coordinates (0-1) to Three.js coordinates
         // MediaPipe: x (0=left, 1=right), y (0=top, 1=bottom)
         // Three.js: x (left=-, right=+), y (bottom=-, top=+)
         const hx = (handPos.x - 0.5) * 15; // -7.5 to 7.5
         const hy = (0.5 - handPos.y) * 15; // flip Y: 7.5 to -7.5
-        const hz = 0; // Рука всегда на плоскости Z=0
+        const hz = 0; // Hand is always on Z=0 plane
         
-        // Вычисляем расстояние от частицы до руки в 3D
+        // Calculate distance from particle to hand in 3D
         const dx = hx - geo.array[i3];
         const dy = hy - geo.array[i3 + 1];
         const dz = hz - geo.array[i3 + 2];
         const distance3D = Math.sqrt(dx * dx + dy * dy + dz * dz);
         
-        // Радиус взаимодействия - увеличил для более заметного эффекта
+        // Interaction radius - increased for more noticeable effect
         const interactionRadius = 4.0;
         
         if (distance3D < interactionRadius) {
-          // Сила отталкивания зависит от расстояния
+          // Repulsion force depends on distance
           const force = (interactionRadius - distance3D) / interactionRadius;
-          const pushStrength = force * 1.2; // Увеличил силу
+          const pushStrength = force * 1.2; // Increased force
           
-          // Нормализуем направление
+          // Normalize direction
           const normalizedDx = distance3D > 0 ? dx / distance3D : 0;
           const normalizedDy = distance3D > 0 ? dy / distance3D : 0;
           const normalizedDz = distance3D > 0 ? dz / distance3D : 0;
           
-          // Отталкиваем частицы от руки
+          // Push particles away from hand
           tx += normalizedDx * pushStrength;
           ty += normalizedDy * pushStrength;
           tz += normalizedDz * pushStrength + Math.sin(time * 3 + i * 0.1) * 0.3;
         }
       }
 
-      // Плавное следование за формой
+      // Smooth following of the shape
       geo.array[i3] += (tx - geo.array[i3]) * 0.08;
       geo.array[i3 + 1] += (ty - geo.array[i3 + 1]) * 0.08;
       geo.array[i3 + 2] += (tz - geo.array[i3 + 2]) * 0.08;
     }
     geo.needsUpdate = true;
-    // Автоматическое вращение замедлено, так как теперь управляется вручную
+    // Automatic rotation slowed down, as it's now manually controlled
     ref.current.rotation.y += 0.0005;
   });
 
@@ -152,19 +153,19 @@ export default function App() {
   const videoRef = useRef(null);
   const [handPos, setHandPos] = useState(null);
   const [shape, setShape] = useState('SATURN');
-  const [zoom, setZoom] = useState(15); // Начальная дистанция камеры
-  const [rotationAngle, setRotationAngle] = useState(0); // Угол вращения
-  const [cameraStatus, setCameraStatus] = useState('Инициализация...');
+  const [zoom, setZoom] = useState(15); // Initial camera distance
+  const [rotationAngle, setRotationAngle] = useState(0); // Rotation angle
+  const [cameraStatus, setCameraStatus] = useState('Initializing...');
   const [handDetected, setHandDetected] = useState(false);
   const [showDebugVideo, setShowDebugVideo] = useState(false);
   const previousPinchDistance = useRef(null);
   const previousHandX = useRef(null);
 
   useEffect(() => {
-    // Проверяем наличие MediaPipe Camera Utils
+    // Check for MediaPipe Camera Utils
     if (typeof window.Camera === 'undefined') {
-      setCameraStatus('Ошибка: MediaPipe Camera Utils не загружены');
-      console.error('MediaPipe Camera Utils не загружены. Проверьте index.html');
+      setCameraStatus('Error: MediaPipe Camera Utils not loaded');
+      console.error('MediaPipe Camera Utils not loaded. Check index.html');
       return;
     }
 
@@ -173,14 +174,14 @@ export default function App() {
 
     const initCamera = async () => {
       try {
-        // Проверяем доступность камеры
+        // Check camera availability
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error('Браузер не поддерживает доступ к камере');
+          throw new Error('Browser does not support camera access');
         }
 
-        setCameraStatus('Запрос доступа к камере...');
+        setCameraStatus('Requesting camera access...');
         
-        // Проверяем разрешения
+        // Check permissions
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
             width: 640, 
@@ -190,7 +191,7 @@ export default function App() {
         });
         stream.getTracks().forEach(track => track.stop());
 
-        setCameraStatus('Инициализация MediaPipe...');
+        setCameraStatus('Initializing MediaPipe...');
 
         hands = new Hands({
           locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -199,20 +200,20 @@ export default function App() {
         hands.setOptions({ 
           maxNumHands: 1, 
           modelComplexity: 1, 
-          minDetectionConfidence: 0.2, // Снизил порог для более чувствительного обнаружения
+          minDetectionConfidence: 0.2, // Lowered threshold for more sensitive detection
           minTrackingConfidence: 0.2
         });
         
         hands.onResults(res => {
-          // Проверяем наличие результатов
+          // Check for results
           if (res && res.multiHandLandmarks && res.multiHandLandmarks.length > 0) {
             const landmarks = res.multiHandLandmarks[0];
             
-            // Проверяем, что landmarks валидны
+            // Check that landmarks are valid
             if (landmarks && landmarks.length > 8) {
-              const indexFinger = landmarks[8]; // Указательный палец
+              const indexFinger = landmarks[8]; // Index finger
               
-              // Проверяем, что координаты валидны
+              // Check that coordinates are valid
               if (indexFinger && 
                   typeof indexFinger.x === 'number' && 
                   typeof indexFinger.y === 'number' &&
@@ -221,9 +222,9 @@ export default function App() {
                 
                 setHandPos({ x: indexFinger.x, y: indexFinger.y });
                 setHandDetected(true);
-                setCameraStatus('Рука обнаружена ✓');
+                setCameraStatus('Hand detected ✓');
                 
-                // Определяем жест pinch (расстояние между указательным и большим пальцем)
+                // Detect pinch gesture (distance between index finger and thumb)
                 if (landmarks.length > 4) {
                   const thumb = landmarks[4];
                   const index = landmarks[8];
@@ -237,14 +238,14 @@ export default function App() {
                       Math.pow(thumb.y - index.y, 2)
                     );
                     
-                    // Если это первый раз или расстояние изменилось значительно
+                    // If this is the first time or distance changed significantly
                     if (previousPinchDistance.current !== null) {
                       const delta = previousPinchDistance.current - pinchDistance;
-                      // Если пальцы сближаются - приближаем, если раздвигаются - отдаляем
+                      // If fingers are closing - zoom in, if opening - zoom out
                       if (Math.abs(delta) > 0.015) {
                         setZoom(prev => {
-                          const newZoom = prev + delta * 40; // Множитель для чувствительности
-                          return Math.max(5, Math.min(30, newZoom)); // Ограничения: от 5 до 30
+                          const newZoom = prev + delta * 40; // Sensitivity multiplier
+                          return Math.max(5, Math.min(30, newZoom)); // Limits: 5 to 30
                         });
                       }
                     }
@@ -252,14 +253,14 @@ export default function App() {
                   }
                 }
                 
-                // Отслеживаем движение руки влево/вправо для вращения
+                // Track hand movement left/right for rotation
                 if (previousHandX.current !== null) {
                   const deltaX = indexFinger.x - previousHandX.current;
-                  // Если рука движется влево/вправо, вращаем фигуру
+                  // If hand moves left/right, rotate the shape
                   if (Math.abs(deltaX) > 0.005) {
                     setRotationAngle(prev => {
-                      const newAngle = prev + deltaX * 2; // Множитель для чувствительности
-                      return newAngle; // Без ограничений, можно крутить бесконечно
+                      const newAngle = prev + deltaX * 2; // Sensitivity multiplier
+                      return newAngle; // No limits, can rotate infinitely
                     });
                   }
                 }
@@ -267,17 +268,17 @@ export default function App() {
               }
             }
           } else {
-            // Рука не обнаружена
+            // Hand not detected
             setHandPos(null);
             setHandDetected(false);
-            setCameraStatus('Камера активна - покажите руку');
+            setCameraStatus('Camera active - show your hand');
             previousPinchDistance.current = null;
             previousHandX.current = null;
           }
         });
 
         if (videoRef.current) {
-          setCameraStatus('Запуск камеры...');
+          setCameraStatus('Starting camera...');
           
           try {
             camera = new window.Camera(videoRef.current, {
@@ -290,7 +291,7 @@ export default function App() {
                     await hands.send({ image: videoRef.current });
                   }
                 } catch (err) {
-                  console.error('Ошибка обработки кадра:', err);
+                  console.error('Error processing frame:', err);
                 }
               },
               width: 640, 
@@ -298,15 +299,15 @@ export default function App() {
             });
             
             camera.start();
-            setCameraStatus('Камера подключена - покажите руку');
+            setCameraStatus('Camera connected - show your hand');
           } catch (err) {
-            console.error('Ошибка запуска камеры:', err);
-            setCameraStatus(`Ошибка запуска камеры: ${err.message}`);
+            console.error('Error starting camera:', err);
+            setCameraStatus(`Error starting camera: ${err.message}`);
           }
         }
       } catch (err) {
-        console.error('Ошибка инициализации камеры:', err);
-        setCameraStatus(`Ошибка: ${err.message}`);
+        console.error('Error initializing camera:', err);
+        setCameraStatus(`Error: ${err.message}`);
       }
     };
 
@@ -322,19 +323,19 @@ export default function App() {
         try {
           camera.stop();
         } catch (e) {
-          console.error('Ошибка остановки камеры:', e);
+          console.error('Error stopping camera:', e);
         }
       }
     };
   }, []);
 
-  // Обработчик колесика мыши для зума
+  // Mouse wheel handler for zoom
   const handleWheel = (e) => {
     e.preventDefault();
     setZoom(prev => {
       const delta = e.deltaY > 0 ? 1.5 : -1.5;
       const newZoom = prev + delta;
-      return Math.max(5, Math.min(30, newZoom)); // Ограничения: от 5 до 30
+      return Math.max(5, Math.min(30, newZoom)); // Limits: 5 to 30
     });
   };
 
@@ -345,6 +346,7 @@ export default function App() {
     >
       <video 
         ref={videoRef} 
+        className="debug-video"
         style={{ 
           display: showDebugVideo ? 'block' : 'none',
           position: 'absolute',
@@ -361,17 +363,17 @@ export default function App() {
         muted
       />
       
-      <div style={{ position: 'absolute', bottom: '50px', left: '50%', transform: 'translateX(-50%)', zIndex: 100, display: 'flex', gap: '10px', alignItems: 'center' }}>
+      <div className="controls-container" style={{ position: 'absolute', bottom: '50px', left: '50%', transform: 'translateX(-50%)', zIndex: 100, display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
         {['SATURN', 'HEART', 'SPHERE'].map(s => (
-          <button key={s} onClick={() => setShape(s)} style={{
+          <button key={s} onClick={() => setShape(s)} className="shape-button" style={{
             background: shape === s ? '#ffdf7e' : 'rgba(255,255,255,0.1)',
             color: shape === s ? '#000' : '#fff',
             border: 'none', padding: '10px 25px', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', transition: '0.3s'
           }}>{s}</button>
         ))}
         
-        {/* Кнопки зума */}
-        <div style={{ display: 'flex', gap: '5px', marginLeft: '20px' }}>
+        {/* Zoom buttons */}
+        <div className="zoom-controls" style={{ display: 'flex', gap: '5px', marginLeft: '20px' }}>
           <button 
             onClick={() => setZoom(prev => Math.max(5, prev - 2))}
             style={{
@@ -400,8 +402,8 @@ export default function App() {
           >+</button>
         </div>
         
-        {/* Кнопки вращения */}
-        <div style={{ display: 'flex', gap: '5px', marginLeft: '20px' }}>
+        {/* Rotation buttons */}
+        <div className="rotation-controls" style={{ display: 'flex', gap: '5px', marginLeft: '20px' }}>
           <button 
             onClick={() => setRotationAngle(prev => prev - 0.2)}
             style={{
@@ -414,7 +416,7 @@ export default function App() {
               fontWeight: 'bold',
               fontSize: '18px'
             }}
-            title="Повернуть влево"
+            title="Rotate left"
           >↶</button>
           <button 
             onClick={() => setRotationAngle(prev => prev + 0.2)}
@@ -428,7 +430,7 @@ export default function App() {
               fontWeight: 'bold',
               fontSize: '18px'
             }}
-            title="Повернуть вправо"
+            title="Rotate right"
           >↷</button>
         </div>
       </div>
@@ -438,7 +440,7 @@ export default function App() {
         <Particles handPos={handPos} shape={shape} rotationAngle={rotationAngle} />
       </Canvas>
       
-      {/* Визуальный индикатор позиции руки для отладки */}
+      {/* Visual indicator of hand position for debugging */}
       {handPos && handPos.x !== undefined && (
         <div style={{
           position: 'absolute',
@@ -456,8 +458,8 @@ export default function App() {
         }} />
       )}
       
-      {/* Статус и подсказки */}
-      <div style={{
+      {/* Status and hints */}
+      <div className="status-panel" style={{
         position: 'absolute',
         top: '20px',
         left: '20px',
@@ -467,7 +469,8 @@ export default function App() {
         background: 'rgba(0,0,0,0.7)',
         padding: '15px',
         borderRadius: '10px',
-        border: handDetected ? '2px solid #00ff00' : '2px solid rgba(255,255,255,0.3)'
+        border: handDetected ? '2px solid #00ff00' : '2px solid rgba(255,255,255,0.3)',
+        maxWidth: '300px'
       }}>
         <div style={{ 
           marginBottom: '10px',
@@ -479,7 +482,7 @@ export default function App() {
         </div>
         {handPos && handPos.x !== undefined && (
           <div style={{ marginBottom: '5px', fontSize: '11px', color: '#00ff00' }}>
-            Координаты: X: {handPos.x.toFixed(3)}, Y: {handPos.y.toFixed(3)}
+            Coordinates: X: {handPos.x.toFixed(3)}, Y: {handPos.y.toFixed(3)}
           </div>
         )}
         {handDetected && (
@@ -491,16 +494,16 @@ export default function App() {
             fontSize: '11px'
           }}>
             <div style={{ color: '#00ff00', fontWeight: 'bold', marginBottom: '5px' }}>
-              Рука обнаружена! Двигайте рукой для взаимодействия
+              Hand detected! Move your hand to interact
             </div>
           </div>
         )}
         <div style={{ marginTop: '10px', fontSize: '11px', opacity: 0.8 }}>
-          <div>• Колесико мыши или кнопки +/- для зума</div>
-          <div>• Сожмите большой и указательный палец для приближения</div>
-          <div>• Разожмите пальцы для отдаления</div>
-          <div>• Двигайте рукой влево/вправо для вращения</div>
-          <div>• Кнопки ↶ ↷ для точного вращения</div>
+          <div>• Mouse wheel or +/- buttons for zoom</div>
+          <div>• Pinch thumb and index finger to zoom in</div>
+          <div>• Spread fingers to zoom out</div>
+          <div>• Move hand left/right to rotate</div>
+          <div>• ↶ ↷ buttons for precise rotation</div>
           <div style={{ marginTop: '10px' }}>
             <button
               onClick={() => setShowDebugVideo(!showDebugVideo)}
@@ -514,7 +517,7 @@ export default function App() {
                 fontSize: '10px'
               }}
             >
-              {showDebugVideo ? 'Скрыть видео' : 'Показать видео камеры'}
+              {showDebugVideo ? 'Hide video' : 'Show camera video'}
             </button>
           </div>
         </div>

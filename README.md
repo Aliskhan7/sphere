@@ -1,31 +1,52 @@
-# React Приложение
+# React 3D Project
 
-Простое React приложение, созданное с использованием Vite.
+A React application with 3D particle effects and hand tracking, created using Vite.
 
-## Установка
+## Features
+
+- Interactive 3D particle shapes (Saturn, Heart, Sphere)
+- Hand tracking using MediaPipe
+- Gesture controls (pinch to zoom, hand movement to rotate)
+- Responsive design for mobile, tablet, and desktop
+- Real-time particle interaction with hand position
+
+## Installation
 
 ```bash
 npm install
 ```
 
-## Запуск
+## Running
 
 ```bash
 npm run dev
 ```
 
-Приложение будет доступно по адресу http://localhost:5173
+The application will be available at http://localhost:5173
 
-## Сборка
+## Build
 
 ```bash
 npm run build
 ```
 
-## Предпросмотр сборки
+## Preview Build
 
 ```bash
 npm run preview
 ```
+
+## Controls
+
+- **Mouse wheel** or **+/- buttons**: Zoom in/out
+- **Pinch gesture** (thumb and index finger): Zoom in/out
+- **Hand movement left/right**: Rotate the shape
+- **Rotation buttons (↶ ↷)**: Precise rotation control
+- **Shape buttons**: Switch between Saturn, Heart, and Sphere
+
+## Requirements
+
+- Modern browser with camera access
+- MediaPipe Camera Utils (loaded via CDN in index.html)
 
 
