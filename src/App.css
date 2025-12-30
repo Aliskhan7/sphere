@@ -56,6 +56,7 @@ button:active {
   flex-wrap: wrap !important;
   gap: 8px !important;
   padding: 0 10px;
+  bottom: 60px !important;
 }
 
 .shape-button {
@@ -94,7 +95,7 @@ button:active {
 /* Tablet styles */
 @media (max-width: 768px) {
   .controls-container {
-    bottom: 30px !important;
+    bottom: 50px !important;
     gap: 6px !important;
   }
 
@@ -139,7 +140,7 @@ button:active {
 /* Mobile styles */
 @media (max-width: 480px) {
   .controls-container {
-    bottom: 20px !important;
+    bottom: 40px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: calc(100% - 20px) !important;
@@ -211,6 +212,64 @@ button:active {
 
   .status-panel > div {
     font-size: 9px !important;
+  }
+}
+
+/* Footer styles */
+.footer {
+  bottom: 10px !important;
+}
+
+.footer a {
+  transition: color 0.3s;
+}
+
+.footer a:hover {
+  color: rgba(255,255,255,1) !important;
+}
+
+.footer img {
+  transition: transform 0.3s;
+}
+
+.footer a:hover img {
+  transform: scale(1.1);
+}
+
+/* Footer responsive */
+@media (max-width: 768px) {
+  .footer {
+    bottom: 5px !important;
+  }
+
+  .footer a {
+    font-size: 11px !important;
+    gap: 6px !important;
+  }
+
+  .footer img {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    bottom: 5px !important;
+  }
+
+  .footer a {
+    font-size: 10px !important;
+    gap: 5px !important;
+  }
+
+  .footer img {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .footer span {
+    display: none;
   }
 }
 

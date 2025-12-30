@@ -9,6 +9,7 @@ A React application with 3D particle effects and hand tracking, created using Vi
 - Gesture controls (pinch to zoom, hand movement to rotate)
 - Responsive design for mobile, tablet, and desktop
 - Real-time particle interaction with hand position
+- Footer with logo and link to portfolio
 
 ## Installation
 
@@ -48,5 +49,9 @@ npm run preview
 
 - Modern browser with camera access
 - MediaPipe Camera Utils (loaded via CDN in index.html)
+
+## Credits
+
+- Created to [AG Portfolio](https://ag-one.netlify.app/)
 
 

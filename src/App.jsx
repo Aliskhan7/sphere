@@ -363,7 +363,7 @@ export default function App() {
         muted
       />
       
-      <div className="controls-container" style={{ position: 'absolute', bottom: '50px', left: '50%', transform: 'translateX(-50%)', zIndex: 100, display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <div className="controls-container" style={{ position: 'absolute', bottom: '60px', left: '50%', transform: 'translateX(-50%)', zIndex: 100, display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
         {['SATURN', 'HEART', 'SPHERE'].map(s => (
           <button key={s} onClick={() => setShape(s)} className="shape-button" style={{
             background: shape === s ? '#ffdf7e' : 'rgba(255,255,255,0.1)',
@@ -521,6 +521,49 @@ export default function App() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Footer with logo and link */}
+      <div className="footer" style={{
+        position: 'absolute',
+        bottom: '10px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 100,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        opacity: 0.7,
+        transition: 'opacity 0.3s'
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+      onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+      >
+        <a 
+          href="https://ag-one.netlify.app/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            textDecoration: 'none',
+            color: 'rgba(255,255,255,0.8)',
+            fontSize: '12px',
+            fontFamily: 'sans-serif'
+          }}
+        >
+          Created by
+          <img 
+            src="/logo.svg" 
+            alt="AG Logo" 
+            style={{
+              width: '24px',
+              height: '24px'
+            }}
+          />
+          <span>AG Portfolio</span>
+        </a>
       </div>
     </div>
   );
